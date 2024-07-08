@@ -1,0 +1,208 @@
+git clone https://github.com/<Karla0509>/<rfskapa>.git
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOLETOS DISPONIBLES</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #D2B48C, #8B4513); /* Café claro a café oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            color: #8B4513; /* Café oscuro */
+            max-width: 400px;
+            margin: auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border: 2px solid #D2B48C; /* Café claro */
+            border-radius: 10px;
+            background-color: #fff;
+            color: #8B4513; /* Café oscuro */
+        }
+        select {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid #D2B48C; /* Café claro */
+            border-radius: 10px;
+            background-color: #fff;
+            color: #8B4513; /* Café oscuro */
+            overflow-y: scroll;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-send {
+            background-color: #8B4513; /* Café oscuro */
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 10px;
+            flex: 1 1 100%;
+            max-width: 200px;
+        }
+        .btn-send:hover {
+            background-color: #D2B48C; /* Café claro */
+        }
+        .btn-action {
+            background-color: #A0522D; /* Café medio */
+            font-size: 14px;
+            padding: 10px 20px;
+            max-width: 120px;
+            margin: 10px;
+            flex: 1 1 45%;
+        }
+        .btn-action:hover {
+            background-color: #D2B48C; /* Café claro */
+        }
+        .btn-restore {
+            background-color: #5A3825; /* Café más oscuro */
+            font-size: 14px;
+            padding: 10px 20px;
+            max-width: 120px;
+            margin: 10px;
+            flex: 1 1 45%;
+        }
+        .btn-restore:hover {
+            background-color: #D2B48C; /* Café claro */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Selecciona Números</h1>
+        <input type="text" id="name" placeholder="Ingresa tu nombre">
+        <select id="numbers" multiple>
+            <!-- Generar los números del 1 al 600 -->
+            <script>
+                const deletedNumbers = JSON.parse(localStorage.getItem('deletedNumbers')) || [];
+                for (let i = 1; i <= 600; i++) {
+                    if (!deletedNumbers.includes(i)) {
+                        document.write(`<option value="${i}">${i}</option>`);
+                    }
+                }
+            </script>
+        </select>
+        <div class="btn-container">
+            <button class="btn-send" onclick="sendMessage()">Enviar por WhatsApp</button>
+        </div>
+        <div class="btn-container">
+            <button class="btn-action btn-delete" onclick="requestPin(deleteSelectedNumbers)">Eliminar Seleccionados</button>
+            <button class="btn-restore btn-restore" onclick="requestPin(restoreSelectedNumbers)">Restaurar Números</button>
+            <button class="btn-restore btn-restore" onclick="requestPin(restoreAllNumbers)">Restaurar Todos</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const name = document.getElementById('name').value;
+            const select = document.getElementById('numbers');
+            const selectedNumbers = Array.from(select.selectedOptions).map(option => option.value);
+            const numbersText = selectedNumbers.join(', ');
+            const message = `Hola soy ${name}\nEstos son mis boletos apartados: ${numbersText}`;
+
+            const phoneNumber = '8447833673'; // Reemplaza con tu número de WhatsApp
+            const whatsappURL = `https://wa.me/${8447833673}?text=${encodeURIComponent(message)}`;
+
+            // Abrir la URL de WhatsApp
+            window.open(whatsappURL, '_blank');
+        }
+
+        function requestPin(callback) {
+            const pin = prompt('Ingrese el PIN de seguridad:');
+            const correctPin = '0526'; // Define tu PIN de seguridad aquí
+
+            if (pin === correctPin) {
+                callback();
+            } else {
+                alert('PIN incorrecto. Acción no permitida.');
+            }
+        }
+
+        function deleteSelectedNumbers() {
+            const select = document.getElementById('numbers');
+            const selectedOptions = Array.from(select.selectedOptions);
+            const deletedNumbers = JSON.parse(localStorage.getItem('deletedNumbers')) || [];
+            
+            selectedOptions.forEach(option => {
+                deletedNumbers.push(Number(option.value));
+                option.remove();
+            });
+
+            localStorage.setItem('deletedNumbers', JSON.stringify(deletedNumbers));
+            alert('Números seleccionados eliminados.');
+        }
+
+        function restoreSelectedNumbers() {
+            const restoreInput = prompt('Ingrese los números a restaurar, separados por comas:');
+            if (restoreInput) {
+                const restoreNumbers = restoreInput.split(',').map(Number);
+                const deletedNumbers = JSON.parse(localStorage.getItem('deletedNumbers')) || [];
+                const newDeletedNumbers = deletedNumbers.filter(num => !restoreNumbers.includes(num));
+
+                // Restaurar los números en el select
+                const select = document.getElementById('numbers');
+                restoreNumbers.forEach(num => {
+                    if (deletedNumbers.includes(num)) {
+                        const option = document.createElement('option');
+                        option.value = num;
+                        option.textContent = num;
+                        select.appendChild(option);
+                    }
+                });
+
+                localStorage.setItem('deletedNumbers', JSON.stringify(newDeletedNumbers));
+                alert('Números restaurados.');
+            }
+        }
+
+        function restoreAllNumbers() {
+            const deletedNumbers = JSON.parse(localStorage.getItem('deletedNumbers')) || [];
+
+            // Restaurar todos los números en el select
+            const select = document.getElementById('numbers');
+            deletedNumbers.forEach(num => {
+                const option = document.createElement('option');
+                option.value = num;
+                option.textContent = num;
+                select.appendChild(option);
+            });
+
+            localStorage.removeItem('deletedNumbers');
+            alert('Todos los números han sido restaurados.');
+        }
+    </script>
+</body>
+</html>
+git add .
+git commit -m "Añadir archivo HTML"
+git push origin main
